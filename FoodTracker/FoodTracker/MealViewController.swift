@@ -7,18 +7,18 @@
 //
 
 import UIKit
+import FirebaseDatabase
 
 class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    //MARK: Properties
     
     @IBOutlet weak var nameTextField: UITextField!
-    
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var ratingControl: RatingControl!
 
-    @IBAction func saveButtonTapped(_ sender: Any) {
-        
+    var databaseRef: DatabaseReference! {
+        return Database.database().reference(withPath: "meals")
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -72,8 +72,26 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         return true
     }
     
+    @IBAction func saveButtonTapped(_ sender: Any) {
+        addMeal()
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func addMeal() {
+        let key = databaseRef.childByAutoId().key
+        let newMeal: [String: Any] = [
+            "id": key,
+            "name": nameTextField.text!,
+            "image": "image1",
+            "rating": ratingControl.rating
+        ]
+        
+        databaseRef.child(key).setValue(newMeal)
+    }
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
        
     }
+
 }
 
