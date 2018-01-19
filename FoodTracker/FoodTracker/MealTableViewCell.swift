@@ -11,7 +11,6 @@ import UIKit
 class MealTableViewCell: UITableViewCell {
 
     //MARK: Propereties
-    
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var ratingControl: RatingControl!
@@ -23,8 +22,6 @@ class MealTableViewCell: UITableViewCell {
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
 }

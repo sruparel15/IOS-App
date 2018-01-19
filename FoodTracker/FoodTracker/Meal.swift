@@ -17,7 +17,6 @@ class Meal {
     var photo: UIImage?
     var rating: Int
     let ref: DatabaseReference?
-   // var key: String
     
     //Mark: Initialization
     init?(name: String, photo: UIImage?, rating: Int) {
@@ -35,7 +34,6 @@ class Meal {
         self.photo = photo
         self.rating = rating
         self.ref = nil
-        
     }
 
     init?(snapshot: DataSnapshot) {
@@ -45,7 +43,6 @@ class Meal {
         photo = snapshotValue["image"] as? UIImage
         rating = snapshotValue["rating"] as! Int
         ref = snapshot.ref
-        
     }
     
     func toAnyObject() -> Any {

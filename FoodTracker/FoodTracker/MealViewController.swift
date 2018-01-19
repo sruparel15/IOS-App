@@ -8,6 +8,7 @@
 
 import UIKit
 import FirebaseDatabase
+import FirebaseStorage
 
 class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -18,12 +19,40 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     var databaseRef: DatabaseReference! {
         return Database.database().reference(withPath: "meals")
     }
+
+    let storage: StorageReference
+    let storagePath = "gs://foodtracker-database.appspot.com/images"
+    let imageName = NSUUID().uuidString
+    required init?(coder aDecoder: NSCoder) {
+        storage = Storage.storage().reference().child("/images").child("\(imageName).png")
+
+        super.init(coder: aDecoder)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+//
         //Handle the text field's user input through delegate callbacks.
         nameTextField.delegate = self
+        
+    }
+
+     func uploadImage(image: UIImage, at reference: StorageReference, completion: @escaping (URL?) -> Void) {
+        guard let imageData = UIImagePNGRepresentation(image) else {
+            return completion(nil)
+        }
+        let  metaData = StorageMetadata()
+        metaData.contentType = "images/jpeg"
+        reference.putData(imageData, metadata: metaData, completion: { (metaData, error) in
+            if let error = error {
+                assertionFailure(error.localizedDescription)
+                print("Upload failed :: ",error.localizedDescription)
+                return completion(nil)
+            }
+            completion(metaData?.downloadURL())
+        })
     }
     
     //MARK: UIImagePickerControllerDelegate
@@ -73,16 +102,25 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     }
     
     @IBAction func saveButtonTapped(_ sender: Any) {
-        addMeal()
-        dismiss(animated: true, completion: nil)
+        guard let image = photoImageView.image else {
+            addMeal(imagePath: nil)
+            dismiss(animated: true, completion: nil)
+            return
+        }
+        
+        uploadImage(image: image, at: storage, completion: { [weak self] url in
+            self?.addMeal(imagePath: url?.absoluteString)
+            self?.dismiss(animated: true, completion: nil)
+        })
+       
     }
     
-    func addMeal() {
+    func addMeal(imagePath: String?) {
         let key = databaseRef.childByAutoId().key
         let newMeal: [String: Any] = [
             "id": key,
             "name": nameTextField.text!,
-            "image": "image1",
+            "image":  imagePath ?? "",
             "rating": ratingControl.rating
         ]
         
