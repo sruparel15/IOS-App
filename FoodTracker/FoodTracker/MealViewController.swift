@@ -31,13 +31,13 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         //Handle the text field's user input through delegate callbacks.
         nameTextField.delegate = self
     }
 
      func uploadImage(image: UIImage, at reference: StorageReference, completion: @escaping (URL?) -> Void) {
-        guard let imageData = UIImagePNGRepresentation(image) else {
+        guard let imageData = UIImageJPEGRepresentation(image, 0.8) else {
             return completion(nil)
         }
         let  metaData = StorageMetadata()

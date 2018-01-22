@@ -22,6 +22,7 @@ class MealTableViewController: UITableViewController {
         super.viewDidLoad()
         
         loadMealsFromDatabase()
+        tableView.allowsMultipleSelectionDuringEditing = true
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,7 +31,24 @@ class MealTableViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+       let meal = self.meals[indexPath.row]
+        if let imageUrl = meal.photoUrl {
+           let imageRef = Storage.storage().reference(forURL: imageUrl)
+            imageRef.delete()
+        }
+       
+        databaseRef.child(meal.id).removeValue() { error, ref in
+            if let error = error {
+                fatalError(error.localizedDescription)
+            }
+        }
+    }
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -44,21 +62,23 @@ class MealTableViewController: UITableViewController {
         //statement for indexpath and assigning
        
         cell.nameLabel.text = meals[indexPath.row].name
-       // cell.photoImageView.image = meals[indexPath.row].photo
         cell.ratingControl.rating = meals[indexPath.row].rating
-        
-        if let imageUrl = meals[indexPath.row].photoUrl {
-            URLSession.shared.dataTask(with: URL(string: imageUrl)!, completionHandler:
-                    { (data, response, error) in
-                        if error != nil {
-                            print(error)
-                            return
-                        }
-                        DispatchQueue.main.async {
-                            cell.photoImageView.image = UIImage(data: data!)
-                        }
-                }).resume()
+
+        let imageSaved = NSCache<NSString, AnyObject>()
+        if let cacheImage = imageSaved.object(forKey: (meals[indexPath.row].photoUrl as NSString?)!) as? UIImage {
+            cell.photoImageView.image = cacheImage
         }
+         let imageUrl = meals[indexPath.row].photoUrl
+        URLSession.shared.dataTask(with: URL(string: imageUrl!)!, completionHandler:
+                                { (data, response, error) in
+                                    if error != nil {
+                                        print(error!)
+                                        return
+                                    }
+                                    DispatchQueue.main.async {
+                                        cell.photoImageView.image = UIImage(data: data!)
+                                    }
+                            }).resume()
         return cell
     }
     

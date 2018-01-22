@@ -16,10 +16,10 @@ class Meal {
     var name: String = ""
     var photoUrl: String?
     var rating: Int
-    let ref: DatabaseReference?
+    let id: String
     
     //Mark: Initialization
-    init?(name: String, photoUrl: String, rating: Int) {
+    init?(name: String, photoUrl: String, rating: Int, id: String) {
         
         //Initialization should fail if there is no name or if the rating is negative
         guard !name.isEmpty else {
@@ -33,7 +33,7 @@ class Meal {
         self.name = name
         self.photoUrl = photoUrl
         self.rating = rating
-        self.ref = nil
+        self.id = id
     }
 
     init?(snapshot: DataSnapshot) {
@@ -42,14 +42,15 @@ class Meal {
         name = snapshotValue["name"] as! String
         photoUrl = snapshotValue["image"] as? String
         rating = snapshotValue["rating"] as! Int
-        ref = snapshot.ref
+        id = snapshotValue["id"] as! String
     }
     
     func toAnyObject() -> Any {
         return [
             "name": name,
-            "image": photoUrl,
-            "rating": rating
+            "image": photoUrl!,
+            "rating": rating,
+            "id": id
         ]
     }
 }
