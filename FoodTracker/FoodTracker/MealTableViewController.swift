@@ -42,11 +42,23 @@ class MealTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MealTableViewCell", for: indexPath) as! MealTableViewCell
         //statement for indexpath and assigning
-        
+       
         cell.nameLabel.text = meals[indexPath.row].name
-        cell.photoImageView.image = meals[indexPath.row].photo
+       // cell.photoImageView.image = meals[indexPath.row].photo
         cell.ratingControl.rating = meals[indexPath.row].rating
-
+        
+        if let imageUrl = meals[indexPath.row].photoUrl {
+            URLSession.shared.dataTask(with: URL(string: imageUrl)!, completionHandler:
+                    { (data, response, error) in
+                        if error != nil {
+                            print(error)
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            cell.photoImageView.image = UIImage(data: data!)
+                        }
+                }).resume()
+        }
         return cell
     }
     
