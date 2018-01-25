@@ -1,2 +1,2 @@
-# IOS-App
+# iOS-App
 Food Rating App
